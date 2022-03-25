@@ -3,24 +3,48 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 
+const connectToDB = require('./util/database').connectToDB;
+
+const User = require('./models/user');
+
+const mongodb = require('mongodb');
+
 const app = express();
 
-// Set EJS as templating engine
 app.set('view engine', 'ejs');
-// app.set('views', path.join(__dirname, 'views'));
+app.set('views', 'views');
 
+const adminData = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
 
-const adminRoutes = require('./routes/user');
-const shopRoutes = require('./routes/view');
-
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/user', adminRoutes);
+app.use((req, res, next) => {
+  console.log('cehcking for user');
+  id = '623d657dc8ad5a02ff08c931';
+  User.fetchByID(id).then(
+    user => {
+      req.user = new User(user.username, user.email, user.cart, user._id);
+      console.log(req.user);
+      next();
+    }
+  ).catch(err => {
+    console.log(err);
+  });
+});
+
+
+app.use('/admin', adminData.routes);
 app.use(shopRoutes);
 
 app.use((req, res, next) => {
-    res.status(404).render('404', {title:'Page Not found', content:'Page Not found'});
+  res.status(404).render('404', { pageTitle: 'Page Not Found' });
 });
 
-app.listen(3001);
+connectToDB((client) => {
+  console.log(client);
+  app.listen(3000);
+})
+
+
