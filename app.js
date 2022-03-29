@@ -8,6 +8,8 @@ const bodyParser = require('body-parser');
 const User = require('./models/user');
 
 const mongoose = require('mongoose');
+const session = require('express-session')
+
 
 const app = express();
 
@@ -16,9 +18,17 @@ app.set('views', 'views');
 
 const adminData = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
+const loginRoutes = require('./routes/auth');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(session({
+  secret: 'MyProject',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true }
+}))
 
 app.use((req, res, next) => {
   User.findById('624193f1153724067dea03f4')
@@ -32,10 +42,12 @@ app.use((req, res, next) => {
 
 app.use('/admin', adminData.routes);
 app.use(shopRoutes);
+app.use(loginRoutes);
 
 app.use((req, res, next) => {
   res.status(404).render('404', { pageTitle: 'Page Not Found' });
 });
+
 
 const uri = "mongodb+srv://falguniparghi:YXgWJZysasxsIQpe@cluster0.6drto.mongodb.net/mongoose_db?retryWrites=true&w=majority"
 mongoose.connect(uri).then(
