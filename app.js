@@ -3,11 +3,11 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const connectToDB = require('./util/database').connectToDB;
+// const connectToDB = require('./util/database').connectToDB;
 
 const User = require('./models/user');
 
-const mongodb = require('mongodb');
+const mongoose = require('mongoose');
 
 const app = express();
 
@@ -21,17 +21,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-  console.log('cehcking for user');
-  id = '623d657dc8ad5a02ff08c931';
-  User.fetchByID(id).then(
-    user => {
-      req.user = new User(user.username, user.email, user.cart, user._id);
-      console.log(req.user);
+  User.findById('624193f1153724067dea03f4')
+    .then(user => {
+      req.user = user;
       next();
-    }
-  ).catch(err => {
-    console.log(err);
-  });
+    })
+    .catch(err => console.log(err));
 });
 
 
@@ -42,9 +37,22 @@ app.use((req, res, next) => {
   res.status(404).render('404', { pageTitle: 'Page Not Found' });
 });
 
-connectToDB((client) => {
-  console.log(client);
-  app.listen(3000);
-})
-
-
+const uri = "mongodb+srv://falguniparghi:YXgWJZysasxsIQpe@cluster0.6drto.mongodb.net/mongoose_db?retryWrites=true&w=majority"
+mongoose.connect(uri).then(
+  res => {
+    User.findOne().then(result => {
+      if (!result) {
+        const user = new User({
+          name:'Falguni',
+          email:'falguni1015@gmail.com',
+          cart : {items : []}
+        });
+        user.save();
+      }
+    }
+    )
+    app.listen(3000);
+  }
+).catch(err => {
+  console.log(err);
+});
