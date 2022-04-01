@@ -4,6 +4,7 @@ const schema = mongoose.Schema;
 const userSchema = new schema({
   name: { type: String, require: true },
   email: { type: String, require: true },
+  password: {type: String},
   cart: {
     items: [{
       productId: { type: schema.Types.ObjectId, ref: 'product' },

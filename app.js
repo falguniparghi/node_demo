@@ -9,7 +9,17 @@ const User = require('./models/user');
 
 const mongoose = require('mongoose');
 const session = require('express-session')
+const MongoDBStore = require('connect-mongodb-session')(session);
+const flash = require('connect-flash');
+const csrf = require('csurf');
 
+
+const store = new MongoDBStore(
+  {
+    uri: 'mongodb+srv://falguniparghi:YXgWJZysasxsIQpe@cluster0.6drto.mongodb.net/mongoose_db?retryWrites=true&w=majority',
+    databaseName: 'mongoose_db',
+    collection: 'mySessions'
+  });
 
 const app = express();
 
@@ -26,26 +36,39 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
   secret: 'MyProject',
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: true }
+  saveUninitialized: false,
+  store: store,
 }))
 
+app.use(flash());
+app.use(csrf());
+
 app.use((req, res, next) => {
-  User.findById('624193f1153724067dea03f4')
+  res.locals.csrfToken = req.csrfToken();
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  next();
+});
+
+
+app.use((req, res, next) => {
+  if (!req.session.user) {
+    return next();
+  }
+  User.findById(req.session.user._id)
     .then(user => {
       req.user = user;
       next();
     })
     .catch(err => console.log(err));
 });
-
-
 app.use('/admin', adminData.routes);
 app.use(shopRoutes);
 app.use(loginRoutes);
 
 app.use((req, res, next) => {
-  res.status(404).render('404', { pageTitle: 'Page Not Found' });
+  res.status(404).render('404', { pageTitle: 'Page Not Found',
+  path: '/404',
+  isAuthenticated: req.session.isLoggedIn });
 });
 
 

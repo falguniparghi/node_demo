@@ -23,7 +23,7 @@ exports.getProductDetails = (req, res, next) => {
       res.render('product-details', {
         product: product,
         pageTitle: 'Admin Products',
-        path: '/admin/product-details'
+        path: '/admin/product-details',
       });
     })
     .catch(err => console.log(err));
@@ -47,6 +47,10 @@ exports.addCartDetails = (req, res, next) => {
     .then(product => {
       console.log(req.user);
       return req.user.addToCart(product);
+    })
+    .then(result => {
+      console.log(result);
+      res.redirect('/cart');
     })
     .catch(err => {
       console.log(err);
@@ -105,10 +109,10 @@ exports.getOrderDetails = (req, res, next) => {
   .find({ 'user.userId': req.user._id })
   .then(
     orders => {
-      res.render('./order', {
-        path: '/order',
+      res.render('orders', {
+        path: '/orders',
         pageTitle: 'Your Orders',
-        products: orders
+        orders: orders
       });
     }
   )
