@@ -10,7 +10,7 @@ You need to connect with your mongo db collection
 
 use your connection string in app.js to connect with database.
 
-Following libraary are used:
+Following libraries are used:
 
 Mogooose - that creates a connection between MongoDB and the Express web application framework
 
