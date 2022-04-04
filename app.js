@@ -16,7 +16,7 @@ const csrf = require('csurf');
 
 const store = new MongoDBStore(
   {
-    uri: 'mongodb+srv://falguniparghi:YXgWJZysasxsIQpe@cluster0.6drto.mongodb.net/mongoose_db?retryWrites=true&w=majority',
+    uri: '',
     databaseName: 'mongoose_db',
     collection: 'mySessions'
   });
